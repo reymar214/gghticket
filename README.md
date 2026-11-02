@@ -1,4 +1,4 @@
-# Ticket Bot (Ticket King-style)
+# Ticket Bot
 
 Staff see **who created the ticket, the ticket #, and the member's answers** in the ticket's opening embed, the Opened log and the Closed log.
 
