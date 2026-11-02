@@ -1,0 +1,387 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ticket Dashboard</title>
+<style>
+:root{--bg:#f6f6f4;--panel:#fff;--text:#1c1c1a;--muted:#6b6b66;--line:#e4e4df;--accent:#b8922a;--accent-bg:#f7efd9;--green:#2e9e5b;--yellow:#c98a00;--red:#d14343;--gray:#777;--input:#fff}
+@media (prefers-color-scheme:dark){:root{--bg:#17171a;--panel:#212125;--text:#ececea;--muted:#9a9a94;--line:#34343a;--accent:#d4af37;--accent-bg:#3a3320;--green:#4cc27f;--yellow:#e8b13a;--red:#f06b6b;--gray:#999;--input:#2a2a2f}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:14px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+.app{display:grid;grid-template-columns:210px 1fr;min-height:100vh}
+aside{background:var(--panel);border-right:1px solid var(--line);padding:18px 12px;display:flex;flex-direction:column;gap:12px;position:sticky;top:0;height:100vh}
+aside h1{font-size:16px;margin:0 6px 4px}
+nav{display:flex;flex-direction:column;gap:2px}
+nav button{all:unset;cursor:pointer;padding:8px 10px;border-radius:8px;color:var(--muted)}
+nav button:hover{background:var(--bg)}
+nav button.on{background:var(--accent-bg);color:var(--text);font-weight:600}
+aside select{width:100%}
+.foot{margin-top:auto;color:var(--muted);font-size:12px;padding:0 6px}
+main{padding:24px 28px;max-width:1150px;width:100%}
+h2{margin:0 0 16px;font-size:20px}
+h3{margin:18px 0 8px;font-size:14px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:20px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.card .n{font-size:26px;font-weight:700}.card .l{color:var(--muted);font-size:12px}
+.card.warn .n{color:var(--yellow)}
+.two{display:grid;grid-template-columns:2fr 1fr;gap:16px}
+@media(max-width:900px){.two,.app{grid-template-columns:1fr}aside{position:static;height:auto}}
+table{width:100%;border-collapse:collapse;background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12px;color:var(--muted);font-weight:600;background:var(--bg)}
+tr:last-child td{border-bottom:0}
+tr[data-act=ticket]{cursor:pointer}tr[data-act=ticket]:hover td{background:var(--bg)}
+.empty{color:var(--muted);text-align:center;padding:22px}
+.muted{color:var(--muted)}
+.badge{display:inline-block;padding:1px 9px;border-radius:99px;font-size:12px;border:1px solid var(--line);white-space:nowrap}
+.badge.g{color:var(--green)}.badge.y{color:var(--yellow)}.badge.x{color:var(--gray)}
+.pri-high,.pri-urgent{color:var(--red);font-weight:600}
+.bar{display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap}
+.chipbtn{all:unset;cursor:pointer;padding:5px 12px;border-radius:99px;border:1px solid var(--line);background:var(--panel)}
+.chipbtn.on{background:var(--accent-bg);border-color:var(--accent);font-weight:600}
+input,select,textarea{background:var(--input);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:7px 9px;font:inherit;max-width:100%}
+input[type=text],input[type=number],textarea,select{width:100%}
+input[type=checkbox]{width:auto}
+textarea{resize:vertical;min-height:70px}
+.search{flex:1;min-width:200px}.search input{width:100%}
+.btn{all:unset;cursor:pointer;padding:7px 14px;border-radius:8px;border:1px solid var(--line);background:var(--panel);text-align:center}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:600}
+.btn.danger{color:var(--red)}
+.btn.sm{padding:3px 9px;font-size:12px}
+.form{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+.row{display:grid;grid-template-columns:200px 1fr;gap:12px;padding:9px 0;border-bottom:1px solid var(--line);align-items:start}
+.row:last-child{border-bottom:0}
+.row label.t{font-weight:600}.row .hint{display:block;color:var(--muted);font-size:12px;font-weight:400}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px}
+.chip{background:var(--bg);border:1px solid var(--line);border-radius:99px;padding:1px 4px 1px 10px;display:inline-flex;gap:4px;align-items:center}
+.chip button{all:unset;cursor:pointer;padding:0 6px;color:var(--muted)}.chip button:hover{color:var(--red)}
+.actions{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;align-items:center}
+.split{display:grid;grid-template-columns:200px 1fr;gap:16px}
+.plistwrap{display:flex;flex-direction:column;gap:6px}
+.plist{all:unset;cursor:pointer;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--panel);display:flex;justify-content:space-between}
+.plist.on{border-color:var(--accent);background:var(--accent-bg)}
+.editor{display:grid;grid-template-columns:1fr 330px;gap:16px;align-items:start}
+@media(max-width:1000px){.editor,.split{grid-template-columns:1fr}}
+details{border:1px solid var(--line);border-radius:10px;padding:8px 12px;margin:8px 0;background:var(--bg)}
+summary{cursor:pointer;font-weight:600}
+.qrow{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0;align-items:center}
+.qrow input[type=text]{flex:1 1 100%}
+.qrow select{width:110px}
+.row.stack{grid-template-columns:1fr}
+details .row{grid-template-columns:140px 1fr}
+.preview{position:sticky;top:16px}
+.embed{background:var(--bg);border:1px solid var(--line);border-left:4px solid #d4af37;border-radius:6px;padding:10px 12px}
+.embed .tt{font-weight:700;margin-bottom:4px}.embed .ds{white-space:pre-wrap}.embed img{max-width:100%;border-radius:6px;margin-top:8px}.embed .ft{color:var(--muted);font-size:12px;margin-top:8px}
+.btns{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.pbtn{padding:4px 12px;border-radius:5px;color:#fff;font-size:13px}
+.pbtn.Primary{background:#5865f2}.pbtn.Secondary{background:#4e5058}.pbtn.Success{background:#248046}.pbtn.Danger{background:#da373c}
+.sel{margin-top:8px;border:1px solid var(--line);border-radius:5px;padding:6px 10px;color:var(--muted)}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;padding:20px;z-index:10}
+.modal.hidden{display:none}
+.modal .box{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px 22px;max-width:780px;width:100%;max-height:90vh;overflow:auto}
+.qa{margin:10px 0}.qa .q{font-weight:600}.qa .a{white-space:pre-wrap;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin-top:3px}
+.kv{display:grid;grid-template-columns:110px 1fr;gap:4px 10px;margin:10px 0}.kv div:nth-child(odd){color:var(--muted)}
+.convo{width:100%;height:380px;border:1px solid var(--line);border-radius:10px;background:#313338;margin-top:6px}
+#toast{position:fixed;bottom:20px;right:20px;background:var(--text);color:var(--bg);padding:10px 16px;border-radius:10px;opacity:0;transition:.2s;pointer-events:none;max-width:420px}
+#toast.show{opacity:1}#toast.err{background:var(--red);color:#fff}
+a{color:var(--accent)}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside>
+    <h1>🎫 Ticket Dashboard</h1>
+    <select id="guild" title="Server"></select>
+    <nav id="nav">
+      <button data-tab="overview">Overview</button>
+      <button data-tab="tickets">Tickets</button>
+      <button data-tab="settings">Settings</button>
+      <button data-tab="panels">Panels</button>
+    </nav>
+    <div class="foot" id="foot">Local only · this PC</div>
+  </aside>
+  <main><div id="view"><p class="muted">Loading…</p></div></main>
+</div>
+<div id="modal" class="modal hidden"><div class="box" id="modalbox"></div></div>
+<div id="toast"></div>
+
+<script>
+const S = { gid: null, guild: null, tickets: [], panels: {}, tab: 'overview', filter: 'open', q: '', form: null, pid: null, draft: null, isNew: false, postTo: '' };
+const $ = (s, r = document) => r.querySelector(s);
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const pad = (n) => String(n).padStart(4, '0');
+const fmtDate = (iso) => (iso ? new Date(iso).toLocaleString() : '—');
+const span = (ms) => { const m = Math.floor(ms / 6e4); if (m < 1) return 'just now'; if (m < 60) return m + 'm'; const h = Math.floor(m / 60); if (h < 24) return h + 'h ' + (m % 60) + 'm'; const d = Math.floor(h / 24); return d + 'd ' + (h % 24) + 'h'; };
+const clip = (s, n) => { s = String(s ?? ''); return s.length > n ? s.slice(0, n - 1) + '…' : s; };
+const clone = (o) => JSON.parse(JSON.stringify(o));
+
+async function api(path, { method = 'GET', body } = {}) {
+  const r = await fetch(path, { method, headers: { 'X-Dashboard': '1', 'Content-Type': 'application/json' }, body: body === undefined ? undefined : JSON.stringify(body) });
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(j.error || r.statusText);
+  return j;
+}
+function toast(msg, err) { const t = $('#toast'); t.textContent = msg; t.className = 'show' + (err ? ' err' : ''); clearTimeout(toast.t); toast.t = setTimeout(() => { t.className = ''; }, 3800); }
+const guard = (fn) => async (...a) => { try { await fn(...a); } catch (e) { toast(e.message, true); } };
+
+// ---------- shared bits ----------
+const badge = (t) => t.status === 'closed' ? '<span class="badge x">⚫ Closed</span>'
+  : t.claimedBy ? `<span class="badge y">🟡 ${esc(t.claimedByName || 'Claimed')}</span>` : '<span class="badge g">🟢 Unclaimed</span>';
+const pri = (t) => (t.priority && t.priority !== 'normal' ? `<span class="pri-${esc(t.priority)}">${esc(t.priority)}</span>` : '<span class="muted">—</span>');
+const firstAnswer = (t) => esc(clip((t.answers[0] && t.answers[0].a) || '', 70));
+function ticketRows(list) {
+  if (!list.length) return '<tr><td colspan="6" class="empty">No tickets here.</td></tr>';
+  return list.map((t) => `<tr data-act="ticket" data-num="${t.num}"><td>#${pad(t.num)}</td><td>${esc(t.username)}</td><td>${esc(t.type)}<div class="muted">${firstAnswer(t)}</div></td><td>${badge(t)}</td><td>${pri(t)}</td><td title="${esc(fmtDate(t.openedAt))}">${span(Date.now() - Date.parse(t.openedAt))} ago</td></tr>`).join('');
+}
+const THEAD = '<thead><tr><th>#</th><th>Creator</th><th>Report</th><th>Status</th><th>Priority</th><th>Opened</th></tr></thead>';
+
+// ---------- overview ----------
+function viewOverview() {
+  const T = S.tickets, open = T.filter((t) => t.status === 'open'), un = open.filter((t) => !t.claimedBy), closed = T.filter((t) => t.status === 'closed');
+  const week = closed.filter((t) => Date.now() - Date.parse(t.closedAt) < 7 * 864e5).length;
+  const durs = closed.map((t) => Date.parse(t.closedAt) - Date.parse(t.openedAt)).filter((n) => n >= 0);
+  const avg = durs.length ? span(durs.reduce((a, b) => a + b, 0) / durs.length) : '—';
+  const wait = [...un].sort((a, b) => Date.parse(a.openedAt) - Date.parse(b.openedAt)).slice(0, 10);
+  const staff = {};
+  for (const t of T) { const id = t.claimedBy || t.closedBy; if (id) { const n = t.claimedByName || t.closedByName || id; staff[id] = { n, c: (staff[id] ? staff[id].c : 0) + 1 }; } }
+  const top = Object.values(staff).sort((a, b) => b.c - a.c).slice(0, 8);
+  const card = (n, l, cls = '') => `<div class="card ${cls}"><div class="n">${n}</div><div class="l">${l}</div></div>`;
+  return `<h2>Overview</h2><div class="cards">${card(open.length, 'Open tickets')}${card(un.length, 'Unclaimed', un.length ? 'warn' : '')}${card(open.length - un.length, 'Claimed')}${card(closed.length, 'Closed (all time)')}${card(week, 'Closed (7 days)')}${card(avg, 'Avg. time to close')}</div>
+  <div class="two"><div><h3>Waiting for staff (oldest first)</h3><table>${THEAD}<tbody>${ticketRows(wait)}</tbody></table></div>
+  <div><h3>Staff activity</h3><table><thead><tr><th>Staff</th><th>Tickets</th></tr></thead><tbody>${top.length ? top.map((s) => `<tr><td>${esc(s.n)}</td><td>${s.c}</td></tr>`).join('') : '<tr><td colspan="2" class="empty">No activity yet.</td></tr>'}</tbody></table></div></div>`;
+}
+
+// ---------- tickets ----------
+function filtered() {
+  const q = S.q.trim().toLowerCase(), f = S.filter;
+  return S.tickets.filter((t) => {
+    if (f === 'open' && t.status !== 'open') return false;
+    if (f === 'unclaimed' && !(t.status === 'open' && !t.claimedBy)) return false;
+    if (f === 'claimed' && !(t.status === 'open' && t.claimedBy)) return false;
+    if (f === 'closed' && t.status !== 'closed') return false;
+    if (!q) return true;
+    return [pad(t.num), t.username, t.type, t.claimedByName, t.closeReason, ...t.answers.map((a) => a.a)].join(' ').toLowerCase().includes(q);
+  });
+}
+function viewTickets() {
+  const chips = [['open', 'Open'], ['unclaimed', 'Unclaimed'], ['claimed', 'Claimed'], ['closed', 'Closed'], ['all', 'All']]
+    .map(([k, l]) => `<button class="chipbtn ${S.filter === k ? 'on' : ''}" data-act="filter" data-f="${k}">${l}</button>`).join('');
+  return `<h2>Tickets</h2><div class="bar">${chips}<div class="search"><input type="text" id="q" placeholder="Search creator, report, answers, reason…" value="${esc(S.q)}"></div></div>
+  <table>${THEAD}<tbody id="tbody">${ticketRows(filtered())}</tbody></table>`;
+}
+function openTicket(num) {
+  const t = S.tickets.find((x) => x.num === num); if (!t) return;
+  const jump = t.status === 'open' ? `<a href="https://discord.com/channels/${esc(S.gid)}/${esc(t.channelId)}" target="_blank" rel="noopener">Open in Discord</a>` : '';
+  const tr = t.hasTranscript ? `<a href="/transcripts/${esc(S.gid)}/${t.num}" target="_blank" rel="noopener">View transcript</a>` : '';
+  const convoSrc = t.status === 'open' ? `/live/${S.gid}/${t.num}` : t.hasTranscript ? `/transcripts/${S.gid}/${t.num}` : null;
+  const convo = '<h3>Conversation</h3>' + (convoSrc ? `<iframe class="convo" sandbox src="${esc(convoSrc)}"></iframe>` : '<p class="muted">No saved conversation for this ticket (it was closed before transcripts were kept).</p>');
+  $('#modalbox').innerHTML = `<div class="bar"><h2 style="margin:0;flex:1">Ticket #${pad(t.num)}</h2>${badge(t)}<button class="btn sm" data-act="closeModal">Close</button></div>
+  <div class="kv"><div>Created by</div><div>${esc(t.username)} <span class="muted">(${esc(t.userId)})</span></div><div>Type</div><div>${esc(t.type)}</div>
+  <div>Priority</div><div>${pri(t)}</div><div>Opened</div><div>${esc(fmtDate(t.openedAt))}</div>
+  <div>Claimed by</div><div>${esc(t.claimedByName || '—')}</div>
+  ${t.status === 'closed' ? `<div>Closed</div><div>${esc(fmtDate(t.closedAt))} by ${esc(t.closedByName || 'System')}</div><div>Reason</div><div>${esc(t.closeReason || '—')}</div>` : ''}</div>
+  ${t.answers.map((a) => `<div class="qa"><div class="q">${esc(a.q)}</div><div class="a">${esc(a.a)}</div></div>`).join('') || '<p class="muted">No form answers.</p>'}
+  ${convo}
+  <div class="actions">${jump}${tr}</div>`;
+  $('#modal').classList.remove('hidden');
+}
+
+// ---------- settings ----------
+const roleItems = () => S.guild.roles.map((r) => ({ id: r.id, name: '@' + r.name }));
+const textItems = () => S.guild.channels.filter((c) => c.type === 'text').map((c) => ({ id: c.id, name: '#' + c.name }));
+const catItems = () => S.guild.channels.filter((c) => c.type === 'category').map((c) => ({ id: c.id, name: c.name }));
+const row = (label, hint, html) => `<div class="row"><label class="t">${label}${hint ? `<span class="hint">${hint}</span>` : ''}</label><div>${html}</div></div>`;
+function select(bind, items, value, { nullable = false, none = '— none —' } = {}) {
+  return `<select data-bind="${bind}" ${nullable ? 'data-nullable' : ''}>${nullable ? `<option value="">${none}</option>` : ''}${items.map((i) => `<option value="${esc(i.id)}" ${i.id === value ? 'selected' : ''}>${esc(i.name)}</option>`).join('')}</select>`;
+}
+function multi(key, items, selected) {
+  const by = Object.fromEntries(items.map((i) => [i.id, i]));
+  const chips = selected.map((id) => `<span class="chip">${esc(by[id] ? by[id].name : id)}<button type="button" data-act="rm" data-key="${key}" data-id="${esc(id)}">×</button></span>`).join('');
+  const rest = items.filter((i) => !selected.includes(i.id));
+  return `<div class="chips">${chips || '<span class="muted">none</span>'}</div><select data-add="${key}"><option value="">Add…</option>${rest.map((i) => `<option value="${esc(i.id)}">${esc(i.name)}</option>`).join('')}</select>`;
+}
+const chk = (bind, on) => `<input type="checkbox" data-bind="${bind}" ${on ? 'checked' : ''}>`;
+const num = (bind, v, min) => `<input type="number" data-bind="${bind}" data-num min="${min}" value="${esc(v)}">`;
+function viewSettings() {
+  const f = S.form;
+  return `<h2>Settings <span class="muted" style="font-size:14px">· ${esc(S.guild.name)}</span></h2><div class="form">
+  ${row('Tickets channel', 'Staff channel: one live message per open ticket, with the role ping and Claim button', select('F:queueChannelId', textItems(), f.queueChannelId, { nullable: true, none: '— not set —' }))}
+  ${row('Closed log', 'Closed tickets are logged here with the reason and transcript', select('F:closedLogId', textItems(), f.closedLogId, { nullable: true, none: '— not set —' }))}
+  ${row('Ticket categories', 'New ticket channels are created here (first one with room)', multi('categoryIds', catItems(), f.categoryIds))}
+  ${row('Support roles', 'Can see and handle tickets', multi('supportRoleIds', roleItems(), f.supportRoleIds))}
+  ${row('Ping roles', 'Pinged on each new ticket. Empty = support roles', multi('pingRoleIds', roleItems(), f.pingRoleIds))}
+  ${row('Blocked roles', 'Cannot open tickets', multi('blockedRoleIds', roleItems(), f.blockedRoleIds))}
+  ${row('Claim mode', '', `<select data-bind="F:claimMode">${[['private', 'Private on claim'], ['readonly', 'Read-only for other staff'], ['nochange', 'No permission changes'], ['disabled', 'Claiming disabled']].map(([v, l]) => `<option value="${v}" ${f.claimMode === v ? 'selected' : ''}>${l}</option>`).join('')}</select>`)}
+  ${row('Ping author on claim', '', chk('F:pingAuthorOnClaim', f.pingAuthorOnClaim))}
+  ${row('Max open per user', '', num('F:maxPerUser', f.maxPerUser, 1))}
+  ${row('Max open in server', '', num('F:maxTotal', f.maxTotal, 1))}
+  ${row('Closing needs a reason', 'Asks for a written explanation', chk('F:closeRequiresReason', f.closeRequiresReason))}
+  ${row('Only staff can close', '', chk('F:closeRequiresSupport', f.closeRequiresSupport))}
+  ${row('Default close reason', 'Used when a reason is not required', `<input type="text" data-bind="F:defaultCloseReason" maxlength="200" value="${esc(f.defaultCloseReason)}">`)}
+  ${row('DM author on close', '', chk('F:dmOnClose', f.dmOnClose))}
+  ${row('Hide who closed', 'Shows “Staff Team”', chk('F:hideCloser', f.hideCloser))}
+  ${row('Auto-close after (hours)', '0 = off', num('F:autoCloseHours', f.autoCloseHours, 0))}
+  ${row('Close when author leaves', '', chk('F:autoCloseOnLeave', f.autoCloseOnLeave))}
+  ${row('Staff counts in close log', '', chk('F:logStaffCounts', f.logStaffCounts))}
+  ${row('Embed color', '', `<input type="color" data-bind="F:color" value="${esc(f.color)}">`)}
+  </div><div class="actions"><button class="btn primary" data-act="saveSettings">Save settings</button></div>`;
+}
+
+// ---------- panels ----------
+function viewPanels() {
+  const ids = Object.keys(S.panels);
+  const list = ids.map((id) => `<button class="plist ${id === S.pid && !S.isNew ? 'on' : ''}" data-act="pick" data-id="${esc(id)}"><span>${esc(id)}</span><span class="muted">${S.panels[id].options.length}</span></button>`).join('');
+  return `<h2>Panels</h2><div class="split"><div class="plistwrap">${list || '<span class="muted">No panels yet</span>'}<button class="btn" data-act="newPanel">+ New panel</button></div>
+  <div>${S.draft ? editor() : '<p class="muted">Pick a panel on the left, or create a new one.</p>'}</div></div>`;
+}
+const fld = (label, html, hint) => `<div class="row"><label class="t">${label}${hint ? `<span class="hint">${hint}</span>` : ''}</label><div>${html}</div></div>`;
+const txt = (bind, v, max, ph = '') => `<input type="text" data-bind="${bind}" maxlength="${max}" placeholder="${esc(ph)}" value="${esc(v)}">`;
+function optionHtml(o, i) {
+  const qs = (o.questions || []).map((q, n) => `<div class="qrow"><input type="text" data-bind="D:options.${i}.questions.${n}.label" maxlength="45" placeholder="Question" value="${esc(q.label)}">
+    <select data-bind="D:options.${i}.questions.${n}.style"><option value="short" ${q.style !== 'paragraph' ? 'selected' : ''}>Short</option><option value="paragraph" ${q.style === 'paragraph' ? 'selected' : ''}>Long</option></select>
+    <label><input type="checkbox" data-bind="D:options.${i}.questions.${n}.required" ${q.required !== false ? 'checked' : ''}> req.</label>
+    <button class="btn sm danger" data-act="rmQ" data-i="${i}" data-n="${n}">✕</button></div>`).join('');
+  return `<details ${o._open ? 'open' : ''}><summary>${esc(o.emoji || '')} ${esc(o.label || '(new option)')} <span class="muted">· ${esc(o.id)}</span></summary>
+  ${fld('Button label', txt(`D:options.${i}.label`, o.label, 80, 'Report'))}
+  ${fld('Emoji', txt(`D:options.${i}.emoji`, o.emoji, 60, '🚨'), 'optional')}
+  ${fld('Button color', `<select data-bind="D:options.${i}.style">${['Primary', 'Secondary', 'Success', 'Danger'].map((s) => `<option ${o.style === s ? 'selected' : ''}>${s}</option>`).join('')}</select>`)}
+  ${fld('Option id', txt(`D:options.${i}.id`, o.id, 30), 'letters, numbers, - _')}
+  ${fld('Channel name', txt(`D:options.${i}.nameFormat`, o.nameFormat, 100, 'report-{number}'), '{number} {username} {type}')}
+  ${fld('Welcome message', `<textarea data-bind="D:options.${i}.embedMessage" maxlength="500">${esc(o.embedMessage)}</textarea>`, '{user} {number}')}
+  <div class="row stack"><label class="t">Questions<span class="hint">max 5</span></label><div>${qs || '<span class="muted">No questions: ticket opens right away</span>'}
+  <div class="actions"><button class="btn sm" data-act="addQ" data-i="${i}" ${(o.questions || []).length >= 5 ? 'disabled' : ''}>+ Question</button>
+  <button class="btn sm" data-act="mvOpt" data-i="${i}" data-d="-1">↑</button><button class="btn sm" data-act="mvOpt" data-i="${i}" data-d="1">↓</button>
+  <button class="btn sm danger" data-act="rmOpt" data-i="${i}">Remove option</button></div></div></div></details>`;
+}
+function editor() {
+  const d = S.draft, opts = d.options || [];
+  const postOpts = textItems().map((c) => `<option value="${esc(c.id)}" ${S.postTo === c.id ? 'selected' : ''}>${esc(c.name)}</option>`).join('');
+  return `<div class="editor"><div><div class="form">
+  <div class="bar"><b>${esc(S.pid)}</b>${S.isNew ? '<span class="badge y">unsaved</span>' : `<span class="muted">posted ${S.panels[S.pid] ? S.panels[S.pid].postedCount : 0}×</span>`}</div>
+  ${fld('Title', txt('D:title', d.title, 100))}
+  ${fld('Description', `<textarea data-bind="D:description" maxlength="2000">${esc(d.description)}</textarea>`)}
+  ${fld('Color', txt('D:color', d.color, 7, '#d4af37'), 'optional hex')}
+  ${fld('Image URL', txt('D:image', d.image, 300, 'https://…'), 'optional')}
+  ${fld('Footer', txt('D:footer', d.footer, 200), 'optional')}
+  ${fld('Show options as', `<select data-bind="D:type"><option value="buttons" ${d.type !== 'select' ? 'selected' : ''}>Buttons</option><option value="select" ${d.type === 'select' ? 'selected' : ''}>Dropdown</option></select>`)}
+  <h3>Options</h3>${opts.map(optionHtml).join('') || '<p class="muted">No options yet.</p>'}
+  <div class="actions"><button class="btn" data-act="addOpt" ${opts.length >= 25 ? 'disabled' : ''}>+ Add option</button></div></div>
+  <div class="actions"><button class="btn primary" data-act="savePanel">Save panel</button>${S.isNew ? '' : '<button class="btn danger" data-act="delPanel">Delete</button>'}</div>
+  ${S.isNew ? '' : `<h3>Post it</h3><div class="actions"><select id="postTo" style="width:220px" data-act-change="postTo"><option value="">Choose channel…</option>${postOpts}</select>
+  <button class="btn" data-act="postPanel">Post to channel</button><button class="btn" data-act="refreshPanel">Update posted copies</button></div>
+  <p class="muted">Save first: posting uses the saved version.</p>`}</div>
+  <div class="preview"><h3 style="margin-top:0">Preview</h3><div id="preview"></div></div></div>`;
+}
+function renderPreview() {
+  const el = $('#preview'); if (!el || !S.draft) return;
+  const d = S.draft, c = /^#?[0-9a-f]{6}$/i.test(d.color || '') ? (d.color[0] === '#' ? d.color : '#' + d.color) : S.guild.settings.color || '#d4af37';
+  const opts = d.options || [];
+  const comp = d.type === 'select' ? `<div class="sel">${esc(d.placeholder || 'Select a ticket type')} ▾</div>`
+    : `<div class="btns">${opts.map((o) => `<span class="pbtn ${esc(o.style || 'Primary')}">${esc(o.emoji || '')} ${esc(o.label || '…')}</span>`).join('')}</div>`;
+  el.innerHTML = `<div class="embed" style="border-left-color:${esc(c)}"><div class="tt">${esc(d.title || '')}</div><div class="ds">${esc(d.description || '')}</div>${/^https?:\/\//i.test(d.image || '') ? `<img src="${esc(d.image)}" alt="">` : ''}${d.footer ? `<div class="ft">${esc(d.footer)}</div>` : ''}</div>${comp}`;
+}
+
+// ---------- rendering & loading ----------
+const VIEWS = { overview: viewOverview, tickets: viewTickets, settings: viewSettings, panels: viewPanels };
+function render() {
+  document.querySelectorAll('#nav button').forEach((b) => b.classList.toggle('on', b.dataset.tab === S.tab));
+  $('#view').innerHTML = VIEWS[S.tab]();
+  if (S.tab === 'panels') renderPreview();
+}
+async function loadGuild() {
+  const [g, t, p] = await Promise.all([api(`/api/guild/${S.gid}`), api(`/api/guild/${S.gid}/tickets`), api(`/api/guild/${S.gid}/panels`)]);
+  S.guild = g; S.tickets = t; S.panels = p; S.form = clone(g.settings);
+  if (S.pid && !S.isNew && !p[S.pid]) { S.pid = null; S.draft = null; }
+  render();
+}
+async function init() {
+  const meta = await api('/api/meta');
+  if (!meta.guilds.length) { $('#view').innerHTML = '<p class="muted">The bot is not in any server yet.</p>'; return; }
+  $('#guild').innerHTML = meta.guilds.map((g) => `<option value="${esc(g.id)}">${esc(g.name)}</option>`).join('');
+  S.gid = meta.defaultGuild || meta.guilds[0].id; $('#guild').value = S.gid;
+  $('#foot').textContent = `Local only · ${meta.bot || 'bot'}`;
+  await loadGuild();
+}
+
+// ---------- events ----------
+function setPath(obj, path, v) {
+  const keys = path.split('.'); let o = obj;
+  for (let i = 0; i < keys.length - 1; i++) o = o[keys[i]];
+  o[keys[keys.length - 1]] = v;
+}
+function onBind(el) {
+  const [root, path] = el.dataset.bind.split(':');
+  let v = el.type === 'checkbox' ? el.checked : el.value;
+  if (el.dataset.num !== undefined) v = v === '' ? '' : Number(v);
+  if (el.dataset.nullable !== undefined && v === '') v = null;
+  setPath(root === 'F' ? S.form : S.draft, path, v);
+  if (root === 'D') renderPreview();
+}
+document.addEventListener('input', (e) => {
+  const el = e.target;
+  if (el.id === 'q') { S.q = el.value; $('#tbody').innerHTML = ticketRows(filtered()); return; }
+  if (el.dataset && el.dataset.bind && el.tagName !== 'SELECT' && el.type !== 'checkbox') onBind(el);
+});
+document.addEventListener('change', (e) => {
+  const el = e.target;
+  if (el.dataset.bind && (el.tagName === 'SELECT' || el.type === 'checkbox')) { onBind(el); if (el.dataset.bind === 'D:type') { renderPreview(); } return; }
+  if (el.dataset.add !== undefined && el.value) { S.form[el.dataset.add].push(el.value); render(); return; }
+  if (el.dataset.actChange === 'postTo') S.postTo = el.value;
+  if (el.id === 'guild') { S.gid = el.value; S.draft = null; S.pid = null; guard(loadGuild)(); }
+});
+document.getElementById('modal').addEventListener('click', (e) => { if (e.target.id === 'modal') $('#modal').classList.add('hidden'); });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') $('#modal').classList.add('hidden'); });
+document.getElementById('nav').addEventListener('click', (e) => { const b = e.target.closest('button[data-tab]'); if (b) { S.tab = b.dataset.tab; render(); } });
+
+const newOption = () => ({ id: 'option', label: '', style: 'Primary', questions: [], _open: true });
+const ACTIONS = {
+  ticket: (d) => openTicket(Number(d.num)),
+  closeModal: () => $('#modal').classList.add('hidden'),
+  filter: (d) => { S.filter = d.f; render(); },
+  rm: (d) => { S.form[d.key] = S.form[d.key].filter((x) => x !== d.id); render(); },
+  saveSettings: guard(async () => { S.guild.settings = await api(`/api/guild/${S.gid}/settings`, { method: 'POST', body: S.form }); S.form = clone(S.guild.settings); render(); toast('Settings saved'); }),
+  pick: (d) => { S.pid = d.id; S.isNew = false; S.draft = clone(S.panels[d.id]); render(); },
+  newPanel: () => {
+    const id = (window.prompt('Panel id (lowercase letters, numbers, - _):') || '').trim().toLowerCase();
+    if (!id) return;
+    if (!/^[a-z0-9_-]{1,30}$/.test(id)) return toast('Use lowercase letters, numbers, - and _ (max 30)', true);
+    if (S.panels[id]) return toast('A panel with that id already exists', true);
+    S.pid = id; S.isNew = true; S.draft = { title: 'Support Tickets', description: 'Pick an option below to open a ticket.', type: 'buttons', options: [newOption()] }; render();
+  },
+  addOpt: () => { const o = newOption(); const ids = new Set(S.draft.options.map((x) => x.id)); let n = 2, id = o.id; while (ids.has(id)) id = 'option-' + n++; o.id = id; S.draft.options.push(o); render(); },
+  rmOpt: (d) => { S.draft.options.splice(Number(d.i), 1); render(); },
+  mvOpt: (d) => { const i = Number(d.i), j = i + Number(d.d), a = S.draft.options; if (j < 0 || j >= a.length) return; [a[i], a[j]] = [a[j], a[i]]; a[i]._open = a[j]._open = true; render(); },
+  addQ: (d) => { const o = S.draft.options[Number(d.i)]; o.questions = o.questions || []; if (o.questions.length < 5) o.questions.push({ label: '', style: 'short' }); o._open = true; render(); },
+  rmQ: (d) => { const o = S.draft.options[Number(d.i)]; o.questions.splice(Number(d.n), 1); o._open = true; render(); },
+  savePanel: guard(async () => {
+    const body = clone(S.draft); body.options.forEach((o) => { delete o._open; });
+    await api(`/api/guild/${S.gid}/panels/${encodeURIComponent(S.pid)}`, { method: 'PUT', body });
+    S.isNew = false; S.panels = await api(`/api/guild/${S.gid}/panels`); S.draft = clone(S.panels[S.pid]); render(); toast('Panel saved');
+  }),
+  delPanel: guard(async () => {
+    if (!window.confirm(`Delete panel "${S.pid}"? Copies already posted in Discord stay until you delete those messages.`)) return;
+    await api(`/api/guild/${S.gid}/panels/${encodeURIComponent(S.pid)}`, { method: 'DELETE' });
+    S.panels = await api(`/api/guild/${S.gid}/panels`); S.pid = null; S.draft = null; render(); toast('Panel deleted');
+  }),
+  postPanel: guard(async () => {
+    if (!S.postTo) return toast('Choose a channel first', true);
+    await api(`/api/guild/${S.gid}/panels/${encodeURIComponent(S.pid)}/send`, { method: 'POST', body: { channelId: S.postTo } });
+    S.panels = await api(`/api/guild/${S.gid}/panels`); render(); toast('Panel posted');
+  }),
+  refreshPanel: guard(async () => {
+    const r = await api(`/api/guild/${S.gid}/panels/${encodeURIComponent(S.pid)}/refresh`, { method: 'POST', body: {} });
+    toast(r.updated ? `Updated ${r.updated} posted panel(s)` : 'No posted copies found. Use “Post to channel”.');
+  }),
+};
+document.addEventListener('click', (e) => {
+  const el = e.target.closest('[data-act]'); if (!el || el.tagName === 'SELECT') return;
+  const f = ACTIONS[el.dataset.act]; if (f) f(el.dataset);
+});
+
+init().catch((e) => { $('#view').innerHTML = `<p class="muted">Could not load: ${esc(e.message)}</p>`; });
+setInterval(() => { if (document.visibilityState === 'visible' && S.gid && ['overview', 'tickets'].includes(S.tab) && $('#modal').classList.contains('hidden')) { api(`/api/guild/${S.gid}/tickets`).then((t) => { S.tickets = t; if (document.activeElement && document.activeElement.id === 'q') { $('#tbody').innerHTML = ticketRows(filtered()); } else render(); }).catch(() => {}); } }, 15000);
+</script>
+</body>
+</html>

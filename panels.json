@@ -1,0 +1,41 @@
+{
+  "guilds": {
+    "1505751017344471101": {
+      "s-1505751017344471101": {
+        "title": "🎟️ DISCORD VIOLATION REPORTING",
+        "description": "Contact a Moderator if you need help with Discord-related issues or want to report a rule violation.\n\nPlease note: This is for Discord-related issues only. It is not for in-game or account support.\n\nClick the button below to create a support ticket.\n- Answer a few questions to submit your ticket.\n- To report a specific message, right-click it and select Copy Message Link.\n- Include screenshots if they can help explain the issue.\n- Once your ticket is created, a private channel will open where you can communicate with the Moderator handling your report.\n- Please be patient. A Moderator will respond as soon as possible.",
+        "image": "https://media.discordapp.net/attachments/1564527013765586995/1564527102622048346/ROCASTLE_BI.png?ex=6ae4e2a8&is=6ae39128&hm=39dd19ce0f7ba87be3007a083c1efc476c7c7cc8136b9b9f4b44389837a72c09&=&format=webp&quality=lossless",
+        "type": "buttons",
+        "options": [
+          {
+            "id": "report",
+            "label": "Create Ticket",
+            "emoji": "🚨",
+            "style": "Danger",
+            "nameFormat": "report-{number}",
+            "embedMessage": "Thanks {user}! A staff member will be with you shortly.",
+            "questions": [
+              {
+                "label": "What do you want to report?",
+                "style": "short",
+                "maxLength": 100
+              },
+              {
+                "label": "Briefly describe it",
+                "style": "paragraph",
+                "maxLength": 1000
+              }
+            ]
+          }
+        ],
+        "messages": [
+          {
+            "channelId": "1565599345276100679",
+            "messageId": "1565599346341183613"
+          }
+        ]
+      }
+    }
+  },
+  "legacy": {}
+}

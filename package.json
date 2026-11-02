@@ -1,0 +1,11 @@
+{
+  "name": "ticket-bot",
+  "version": "2.0.0",
+  "description": "Discord ticket bot modeled on Ticket King's documented features",
+  "main": "index.js",
+  "scripts": { "start": "node index.js" },
+  "dependencies": {
+    "discord.js": "^14.16.0",
+    "dotenv": "^16.4.5"
+  }
+}
