@@ -22,7 +22,6 @@ panels.<id>: title, description, color, type ("buttons" | "select"), placeholder
              supportRoleIds[], categoryId, nameFormat ({number} {username} {type}), embedMessage ({user} {number})
 ```
 
-## Implemented from the Ticket King docs
 Multiple panels (buttons or dropdown) · per-option forms (up to 5 questions) · per-option support roles, category, name format, welcome message · blocked roles · max tickets per user/server · category fallback when one is full · continuous ticket numbers · `/claim` `/unclaim` `/transfer` with the 4 claim modes + Claim button + ping author · `/close` with required-reason, staff-only close, default reason, hide closer, DM to author · HTML transcripts · Opened/Closed logs (with answers) · staff message counts · `/add` `/remove` `/rename` `/priority` · `/createticket` + right-click "Create Ticket" · auto-close on author leaving · inactivity auto-close · close on manual channel deletion · `/help`
 
 ## Not implemented
